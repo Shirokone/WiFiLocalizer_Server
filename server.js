@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 //DB:
 
 const mongoose = require('mongoose');
-mongoose.connect("mongodb+srv://shiro:max1max2@rpg-test-oll8x.mongodb.net/test?retryWrites=true", {useCreateIndex: true, useNewUrlParser: true}).then(()=>console.log("Connected to DB"))
+mongoose.connect(process.env.MONGODB_URI, {useCreateIndex: true, useNewUrlParser: true}).then(()=>console.log("Connected to DB"))
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
