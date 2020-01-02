@@ -8,45 +8,71 @@ const Data = require("../../models/Data");
 // @desc New Sensor Data
 // @access Public
 router.post("/", (req, res) => {
-    console.log(req.body);
     const { SensorId, APs } = req.body;
+    Data.findOne({sensorId: SensorId}).exec((err,data) => {
+        if(err){
+            console.error(err)
+        }
+        if(!data){
+            let newData = new Data({sensorId: SensorId})
+            APs.forEach(element => {
+                newData.measurements.push({
+                    ssid: element.SSID,
+                    rssi: element.RSSI
+                })
+        
+            });
+            newData.save((err) => {
+                if(err){
+                    console.error(err)
+                }
+                res.status(201).json(newData);
+            });
+        }else{//sensor exists
+            APs.forEach(element => {
+                let exists = false
+                data.measurements.forEach((measure, ind) => {
+                    if(measure.ssid == element.SSID){
+                        exists = true
+                        data.measurements[ind] = {
+                            ssid: element.SSID,
+                            rssi: element.RSSI,
+                            date: Date.now()
+                        }
+                    }                    
+                })
+                if(!exists){
+                    data.measurements.push({
+                        ssid: element.SSID,
+                        rssi: element.RSSI
+                    })
+                }
+                
+            })
+            data.save((err) => {
+                if(err){
+                    console.error(err)
+                }
+                res.status(201).json(data);
+            });
+        }
+    })
+    
 
-    APs.forEach(element => {
-        var newData = new Data({
-            sensorId: SensorId,
-            ssid: element.SSID,
-            rssi: element.RSSI
-        })
-
-        newData.save();
-    });
-
-    res.status(200).json(req.body);
 });
 
 // @route GET api/sensors // @desc New Sensor Data // @access Public 
 router.get("/", (req, res) => {
-    Data.find({}).distinct("sensorId").sort({sensorId: "asc"}).exec((err, data) => {
+    Data.find({}).sort({sensorId: "asc"}).exec((err, data) => {
         if(err){ 
             res.status(500).send(err) 
         } 
         if(!data){ 
             res.status(404).send()
         } 
-        let result = []
-        let itemsProcessed = 0
-        data.forEach(sensor => {
-            Data.find({sensorId: sensor.sensorId}).distinct("ssid").sort({date: -1}).exec((err, _data) => {
-                if(err){ 
-                    res.status(500).send(err) 
-                } 
-                result.push(_data)
-                itemsProcessed++
-                if(itemsProcessed == data.length){
-                    return res.status(200).json(reslut)
-                }
-            })
-        })
+        console.log(data[0].measurements)
+        return res.status(200).json(data)
+                
     }) 
 })
 
