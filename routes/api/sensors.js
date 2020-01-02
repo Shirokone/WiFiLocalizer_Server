@@ -26,7 +26,7 @@ router.post("/", (req, res) => {
 
 // @route GET api/sensors // @desc New Sensor Data // @access Public 
 router.get("/", (req, res) => {
-    Data.find({}).sort({date: -1}).limit(200).exec((err, data) => {
+    Data.find({}).sort({sensorId: "asc", ssid: "asc", date: -1}).limit(200).exec((err, data) => {
         if(err){ 
             res.status(500) 
         } 
