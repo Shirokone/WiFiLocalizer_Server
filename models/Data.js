@@ -8,7 +8,7 @@ const DataSchema = new Schema({
         required: true
     },
     sensorId: {
-        type: Number,
+        type: String,
         required: true
     },
     ssid: {
