@@ -13,18 +13,19 @@ var connection = mysql.createConnection({
     database: '00263908_wifi_trilaterator'
   })
 
+  connection.connect(function(err) {
+    if (err) {
+      console.error('error connecting: ' + err.stack);
+      return;
+    }
+  
+    console.log('connected as id ' + connection.threadId);
+  });
+
 // @route POST api/sensors
 // @desc New Sensor Data
 // @access Public
 router.post("/", (req, res) => {
-    connection.connect(function(err) {
-        if (err) {
-          console.error('error connecting: ' + err.stack);
-          return;
-        }
-      
-        console.log('connected as id ' + connection.threadId);
-      });
 
       const { SensorId, APs } = req.body;
       APs.forEach(ap=>{
@@ -34,8 +35,6 @@ router.post("/", (req, res) => {
         })
       })
       
-
-      connection.end()
       return res.status(201).send("OK");
 });
 
@@ -43,14 +42,7 @@ router.post("/", (req, res) => {
 // @desc Get all sensors
 // @access Public 
 router.get("/", (req, res) => {
-    connection.connect(function(err) {
-        if (err) {
-          console.error('error connecting: ' + err.stack);
-          return;
-        }
-      
-        console.log('connected as id ' + connection.threadId);
-      });
+
     let sql = "SELECT * FROM All_Full_Readings";
     
     connection.query(sql,(err, result, fields)=>{
@@ -59,7 +51,7 @@ router.get("/", (req, res) => {
         }
         return res.status(200).json(result)
     })
-    connection.end()
+    
 })
 
 module.exports = router;
