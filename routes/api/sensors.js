@@ -61,7 +61,9 @@ router.post("/", (req, res) => {
 
 });
 
-// @route GET api/sensors // @desc New Sensor Data // @access Public 
+// @route GET api/sensors 
+// @desc Get all sensors
+// @access Public 
 router.get("/", (req, res) => {
     Data.find({}).sort({sensorId: "asc"}).exec((err, data) => {
         if(err){ 
@@ -71,6 +73,24 @@ router.get("/", (req, res) => {
             res.status(404).send()
         } 
         console.log(data[0].measurements)
+        return res.status(200).json(data)
+                
+    }) 
+})
+
+// @route GET api/sensors 
+// @desc Get ssid
+// @access Public 
+
+router.get("/ssid/:_id", (req, res) => {
+    Data.find({"measurements.ssid":req.params._id}).sort({sensorId: "asc"}).exec((err, data) => {
+        if(err){ 
+            res.status(500).send(err) 
+        } 
+        if(!data){ 
+            res.status(404).send()
+        } 
+        
         return res.status(200).json(data)
                 
     }) 
