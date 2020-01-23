@@ -1,99 +1,65 @@
 const express = require("express");
 const router = express.Router();
+var mysql = require('mysql')
 
 // Models
-const Data = require("../../models/Data");
+//const Data = require("../../models/Data");
+
+//MYSQL
+var connection = mysql.createConnection({
+    host: 'hosting1900584.online.pro',
+    user: '00263908_wifi_trilaterator',
+    password: 'wifi_trilaterator',
+    database: '00263908_wifi_trilaterator'
+  })
 
 // @route POST api/sensors
 // @desc New Sensor Data
 // @access Public
 router.post("/", (req, res) => {
-    const { SensorId, APs } = req.body;
-    Data.findOne({sensorId: SensorId}).exec((err,data) => {
-        if(err){
-            console.error(err)
+    connection.connect(function(err) {
+        if (err) {
+          console.error('error connecting: ' + err.stack);
+          return;
         }
-        if(!data){
-            let newData = new Data({sensorId: SensorId})
-            APs.forEach(element => {
-                newData.measurements.push({
-                    ssid: element.SSID,
-                    rssi: element.RSSI
-                })
-        
-            });
-            newData.save((err) => {
-                if(err){
-                    console.error(err)
-                }
-                res.status(201).json(newData);
-            });
-        }else{//sensor exists
-            APs.forEach(element => {
-                let exists = false
-                data.measurements.forEach((measure, ind) => {
-                    if(measure.ssid == element.SSID){
-                        exists = true
-                        data.measurements[ind] = {
-                            ssid: element.SSID,
-                            rssi: element.RSSI,
-                            date: Date.now()
-                        }
-                    }                    
-                })
-                if(!exists){
-                    data.measurements.push({
-                        ssid: element.SSID,
-                        rssi: element.RSSI
-                    })
-                }
-                
-            })
-            data.save((err) => {
-                if(err){
-                    console.error(err)
-                }
-                res.status(201).json(data);
-            });
-        }
-    })
-    
+      
+        console.log('connected as id ' + connection.threadId);
+      });
 
+      const { SensorId, APs } = req.body;
+      APs.forEach(ap=>{
+        connection.query("INSERT INTO readings (SSID, SensorID, Rssi) VALUES ('"+ap.SSID+"','"+SensorId+"','"+ap.RSSI+"')", (err, result)=>{
+            if (err) throw err;
+            console.log("Number of records inserted: " + result.affectedRows);
+        })
+      })
+      
+
+      connection.end()
+      return res.status(201).send("OK");
 });
 
 // @route GET api/sensors 
 // @desc Get all sensors
 // @access Public 
 router.get("/", (req, res) => {
-    Data.find({}).sort({sensorId: "asc"}).exec((err, data) => {
-        if(err){ 
-            res.status(500).send(err) 
-        } 
-        if(!data){ 
-            res.status(404).send()
-        } 
-        console.log(data[0].measurements)
-        return res.status(200).json(data)
-                
-    }) 
-})
-
-// @route GET api/sensors 
-// @desc Get ssid
-// @access Public 
-
-router.get("/ssid/:_id", (req, res) => {
-    Data.find({"measurements.ssid":req.params._id}).sort({sensorId: "asc"}).exec((err, data) => {
-        if(err){ 
-            res.status(500).send(err) 
-        } 
-        if(!data){ 
-            res.status(404).send()
-        } 
-        
-        return res.status(200).json(data)
-                
-    }) 
+    connection.connect(function(err) {
+        if (err) {
+          console.error('error connecting: ' + err.stack);
+          return;
+        }
+      
+        console.log('connected as id ' + connection.threadId);
+      });
+    let sql = "SELECT * FROM All_Full_Readings";
+    
+    connection.query(sql,(err, result, fields)=>{
+        if(err){
+            return res.status(500).json(err);
+        }
+        return res.status(200).json(result)
+    })
+    connection.end()
 })
 
 module.exports = router;

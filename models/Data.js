@@ -45,4 +45,26 @@ const DataSchema2 = new Schema({
     
 });
 
-module.exports = Data = mongoose.model("data", DataSchema2);
+const SSID = new Schema({
+    ssid: {
+        type: String,
+        required: true
+    },
+    measurements: [{
+        sensorId: {
+            type: String,
+            required: true
+        },
+        rssi: {
+            type: Number,
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+            required: true
+        }
+    }]
+})
+
+module.exports = Data = mongoose.model("data", SSID);

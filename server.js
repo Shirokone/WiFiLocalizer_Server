@@ -6,10 +6,10 @@ require('dotenv').config();
 const http = require('http').createServer(app);
 const port = process.env.PORT || 5000;
 
-//DB:
 
-const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI, {useCreateIndex: true, useNewUrlParser: true}).then(()=>console.log("Connected to DB"))
+//const mongoose = require('mongoose');
+//mongoose.connect(process.env.MONGODB_URI, {useCreateIndex: true, useNewUrlParser: true}).then(()=>console.log("Connected to DB"))
+
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -23,3 +23,4 @@ app.use("/api/sensors", require("./routes/api/sensors.js"));
 
 
 http.listen(port, () => console.log(`App running on port ${port}!`))
+
